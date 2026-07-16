@@ -6,7 +6,15 @@ A private collection of reusable ChatGPT skills created for M. Ahmad.
 
 ### Job Application Checker
 
-Checks Gmail Sent mail before drafting a job application email. It detects previous applications using the recipient, company, and role title, reports when the earlier application was sent, and drafts a tailored email only when appropriate.
+Uses a strict gated workflow for job applications:
+
+1. Opens and resolves the LinkedIn post or supplied job description.
+2. Extracts the role, company, application email, subject, and key requirements.
+3. Searches Gmail Sent mail before writing anything.
+4. Reports a definite or possible previous application with its sent date and elapsed time.
+5. Asks for confirmation before preparing another email when a prior application exists.
+6. Writes a tailored email in normal chat only when no duplicate is found or the user explicitly approves continuing.
+7. Creates or sends a Gmail message only after a separate explicit request.
 
 Source: `skills/job-application-checker/`
 
@@ -20,6 +28,7 @@ skills/
     SKILL.md
     agents/openai.yaml
     references/application-profile.md
+    references/workflow-tests.md
 
 dist/
   job-application-checker.zip
