@@ -1,0 +1,10 @@
+interface:
+  display_name: Job Application Checker
+  short_description: Checks Sent mail for duplicate applications, then drafts a tailored job email.
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
