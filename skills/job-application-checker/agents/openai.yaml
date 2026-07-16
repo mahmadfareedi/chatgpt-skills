@@ -1,6 +1,6 @@
 interface:
   display_name: Job Application Checker
-  short_description: Checks Sent mail for duplicate applications, then drafts a tailored job email.
+  short_description: Resolves the job post, checks Sent mail first, then writes an email only when safe.
 policy:
   products:
   - chatgpt
