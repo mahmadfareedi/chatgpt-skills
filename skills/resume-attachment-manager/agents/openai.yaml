@@ -1,0 +1,10 @@
+interface:
+  display_name: Resume Attachment Manager
+  short_description: Retrieves the latest resume PDF and attaches it to an approved Gmail draft when supported.
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
