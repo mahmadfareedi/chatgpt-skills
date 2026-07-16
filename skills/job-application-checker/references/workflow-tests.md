@@ -13,7 +13,7 @@ Expected path:
 3. Search Gmail Sent mail and read relevant matches.
 4. Report the previous application date and elapsed time.
 5. Ask whether the user really wants another email.
-6. Do not draft anything before confirmation.
+6. Do not draft or retrieve a resume before confirmation.
 
 ## Test 2: LinkedIn URL and no duplicate
 
@@ -50,10 +50,40 @@ Expected path:
 2. Write the new email in normal chat text.
 3. Do not create or send a Gmail message unless separately requested.
 
-## Test 6: User asks to save the approved email
+## Test 6: User asks to save an approved email without attachment support
 
 Expected path:
 
 1. Confirm recipient, subject, and approved body.
-2. Create a Gmail draft.
-3. Do not send it.
+2. Do not claim the resume is attached.
+3. Explain that an attachment-capable Gmail MCP or connector is required.
+4. Do not send.
+
+## Test 7: User asks for a Gmail draft with the resume attached
+
+Expected path:
+
+1. Complete the job-post and duplicate-check gates first.
+2. Write or confirm the approved email.
+3. Resolve the latest `master` commit in `mahmadfareedi/resume`.
+4. Fetch `Muhammad_Ahmad_Senior_Data_Analyst.pdf` from that exact commit.
+5. Verify the PDF and create a Gmail draft only through an attachment-capable tool.
+6. Confirm the exact attachment filename from the tool response.
+7. Do not send.
+
+## Test 8: Attachment tool returns no attachment confirmation
+
+Expected path:
+
+1. Treat the draft as unverified.
+2. Do not claim the resume is attached.
+3. Ask the user to review the draft manually or retry after fixing the connector.
+
+## Test 9: Resume path returns HTML or another file type
+
+Expected path:
+
+1. Reject the result.
+2. Do not attach it.
+3. Report that the configured PDF could not be verified.
+4. Do not create or send a Gmail message.
