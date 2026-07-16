@@ -1,101 +1,176 @@
 ---
 name: job-application-checker
-description: Check Gmail before drafting job application emails to prevent duplicate applications, then create a concise, tailored email for review. Use when the user shares a LinkedIn job post, job advertisement, recruiter email, application email address, screenshot, or job description and asks to apply, write an application email, or check whether they already applied. Search Sent mail using the recipient, job title, and company; report any matching prior application with its date and elapsed time; otherwise draft the email without sending it.
+description: Enforce a strict job application workflow that resolves the LinkedIn post or job description, checks Gmail Sent mail for a prior application, and only then writes a tailored application email in normal chat for review. Use when the user shares a LinkedIn URL, recruiter post, job advertisement, screenshot, recipient email, or job description and asks to apply or write an email. Never draft, open an email compose card, create a Gmail draft, or send anything before completing the duplicate check or receiving explicit permission to proceed without it.
 ---
 
 # Job Application Checker
 
-Use this workflow in order. Never send an application email automatically.
+Follow the workflow as a strict state machine. Do not skip, reorder, or combine the gates.
 
-## 1. Extract the application details
+## Non-negotiable rules
 
-Identify:
+- Never write the application email before the Gmail duplicate check is complete.
+- Never open an email compose card merely because the user says `write an email` or `apply`.
+- Never call Gmail draft or send actions during the checking stage.
+- Return the email as normal chat text after a confirmed `No duplicate` result.
+- Create a Gmail draft only when the user explicitly asks to save the approved email as a Gmail draft.
+- Send only when the user explicitly asks to send an approved email.
+- If job details or Gmail access are insufficient, stop and explain what is missing. Do not silently continue.
+
+## Gate 1: Resolve the job post
+
+First inspect all supplied material and extract:
 
 - Exact job title
 - Company name
-- Recipient email address
+- Recipient email address, when listed
+- Recruiter or contact name, only when explicitly stated
 - Location, when relevant
-- Subject line required by the post, if specified
+- Required application subject, when stated
+- Application method
 - Three to five requirements most relevant to the candidate
 
-If the user provides only a LinkedIn or public job-post URL, open it and extract the details. If the page is inaccessible, use any text or screenshot in the conversation. Ask for pasted content only when the role, recipient, or application method cannot otherwise be determined.
+For a LinkedIn or public job-post URL:
 
-## 2. Check Gmail Sent mail first
+1. Open the URL and inspect its content before doing anything else.
+2. Use text or screenshots already supplied in the conversation when the page is inaccessible.
+3. If the page cannot be accessed and the conversation does not contain enough details, ask the user to paste the post or upload a screenshot.
+4. Do not infer the recruiter's name, company, role, or email from the URL slug alone.
+5. Do not proceed to drafting while the job title or company is unresolved.
 
-Use the connected Gmail account before drafting.
+Mark this gate complete only after the role and company are known and the application method has been checked.
 
-Search in this order:
+## Gate 2: Check Gmail Sent mail
 
-1. `in:sent to:<recipient-email>`
-2. `in:sent to:<recipient-email> subject:"<job-title>"`
+Use the connected Gmail account and search `in:sent`. This check is mandatory even when the user only says `write email for it`.
+
+Search in this order, using every applicable query:
+
+1. When an application email is known: `in:sent to:<recipient-email>`
+2. `in:sent subject:"<exact-job-title>"`
 3. `in:sent "<company-name>" "<distinctive-job-title-words>"`
+4. When the title has common variants, repeat the subject or keyword search with the closest variant.
 
-Read the most relevant candidate messages. Compare normalized recipient addresses, company names, and role titles. Ignore capitalization, punctuation, abbreviations, and harmless word-order differences.
+Do not rely on search snippets alone. Read the most relevant candidate messages and compare:
 
-Classify the result:
+- Normalized recipient address
+- Company name
+- Job title and close title variants
+- Email subject
+- Sent date
+- Application wording or attachment context when needed
 
-- **Definite duplicate:** Same recipient email and same or closely matching job title.
-- **Possible duplicate:** Same company and closely matching role, but a different recipient or incomplete evidence.
-- **No duplicate:** No relevant sent application found.
+Run at least two applicable searches before declaring `No duplicate`. A recipient-only search is not sufficient because the same company may use multiple recruiting addresses.
 
-Do not treat a similar role at another company as a duplicate.
+If Gmail is not connected, inaccessible, or returns an error:
 
-## 3. Respond when a prior application exists
+- State that the duplicate check could not be completed.
+- Do not write an email yet.
+- Ask: `I could not verify your Sent mail. Do you want me to proceed without the duplicate check?`
+- Continue only after the user explicitly confirms.
 
-For a definite duplicate, stop before drafting. Report:
+## Gate 3: Classify and stop or continue
 
-- That the user already applied
-- Exact job title and company found
+Classify the evidence as one of these states:
+
+### Definite duplicate
+
+Use when the same recipient and same or closely matching role are found, or when the message clearly shows an application for the same company and role.
+
+Stop before drafting. Report:
+
+- Exact or closest job title found
+- Company
 - Recipient email
-- Previous email subject
+- Previous subject
 - Exact sent date
 - Natural elapsed time, such as `4 days ago`, `3 weeks ago`, or `about 2 months ago`
 
-Then ask one direct question: `You already applied for this role. Do you want me to prepare another application email?`
+Then ask exactly one confirmation question:
 
-For a possible duplicate, explain the uncertainty and show the same available details. Ask whether to continue with a new draft.
+`You already applied for this role. Do you really want me to prepare another application email?`
 
-Do not create or send a second email until the user confirms.
+Do not draft, create a Gmail draft, or send anything until the user confirms.
 
-## 4. Draft when no duplicate exists
+### Possible duplicate
 
-Create a tailored application email for review. Use the current CV or profile details available in the conversation. Consult `references/application-profile.md` for stable defaults, but prefer newer CV information whenever available.
+Use when the company and a closely matching role are found but the recipient differs or the evidence is incomplete.
+
+Explain the uncertainty, show the available details and elapsed time, then ask whether to prepare another email. Stop until the user confirms.
+
+### No duplicate
+
+Use only after the required Gmail searches and message review find no relevant application.
+
+State:
+
+`I checked your Sent mail and did not find a matching application for this role.`
+
+Only now proceed to Gate 4.
+
+## Gate 4: Write the email in chat
+
+Write a tailored application email as normal chat text. Do not open a compose card and do not create a Gmail draft.
+
+Use the current CV or profile details available in the conversation. Consult `references/application-profile.md` for stable defaults, but prefer newer CV evidence.
 
 Follow these rules:
 
 - Use US English.
 - Keep the email concise, usually 120 to 180 words.
-- Use a simple, professional, natural tone.
+- Use a professional, natural, respectful tone.
 - Tailor two or three sentences to the post's main requirements.
-- Mention only skills and experience supported by the CV, conversation, or profile reference.
+- Mention only experience supported by the CV, conversation, or profile reference.
 - Do not invent machine learning, forecasting, leadership, domain, salary, relocation, or certification claims.
 - Avoid generic praise, excessive enthusiasm, emojis, hashtags, and dash punctuation.
-- Use `Dear Hiring Team,` when no person's name is available.
-- Use `M. Ahmad` as the closing signature.
+- Use `Dear Hiring Team,` when no person's name is confirmed.
+- Never address the LinkedIn post author by name unless the post explicitly identifies that person as the application contact.
+- Use `M. Ahmad` as the signature.
 - If the post specifies a subject, use it exactly. Otherwise use `Application for <Exact Job Title>`.
-- Mention an attached CV only when the user intends to attach one. Add a brief reminder outside the email to attach the updated CV before sending.
+- Mention an attached CV only when the user intends to attach one.
+- Add a short reminder outside the email to attach the latest CV when applicable.
+- If no recipient email was found, state that clearly outside the email. Never create a Gmail draft with an empty recipient.
 
-Return the finished email as a reviewable email draft. Do not send it and do not create a Gmail draft unless the user explicitly asks to save it in Gmail.
+## Gate 5: Optional Gmail action
 
-## 5. Optional Gmail draft
+Treat these as separate explicit actions:
 
-When the user explicitly asks to save the approved version in Gmail:
+- `Save this as a Gmail draft`: create a Gmail draft using the approved recipient, subject, and body.
+- `Send this email`: send only the approved version and only after the user explicitly requests sending.
 
-1. Use the extracted recipient and approved subject.
-2. Create a Gmail draft, not a sent email.
+Before creating a Gmail draft or sending:
+
+1. Confirm the recipient is known.
+2. Use the approved subject and body.
 3. Do not claim the CV is attached unless an attachment was actually added.
-4. Confirm that the draft was saved for review.
+4. Do not repeat the duplicate check unless the job details changed or significant time has passed.
 
-Only send when the user explicitly asks to send the approved Gmail draft.
-
-## Output patterns
+## Required output patterns
 
 ### Definite duplicate
 
-`You already applied for <Job Title> at <Company> on <Exact Date>, <elapsed time>. The email was sent to <recipient> with the subject “<subject>”. Do you want me to prepare another application email?`
+`You already applied for <Job Title> at <Company> on <Exact Date>, <elapsed time>. The email was sent to <recipient> with the subject "<subject>". Do you really want me to prepare another application email?`
+
+### Possible duplicate
+
+`I found a possible previous application for <Role> at <Company>, sent on <Exact Date>, <elapsed time>. The recipient or title is not an exact match. Do you want me to prepare a new application email anyway?`
 
 ### No duplicate
 
-Start with: `I did not find a matching application in your Sent mail.`
+Start with:
 
-Then provide the complete reviewable application email and a short reminder to attach the latest CV when applicable.
+`I checked your Sent mail and did not find a matching application for this role.`
+
+Then provide the subject and complete email in normal chat text.
+
+### Blocked because details are missing
+
+`I have not drafted the email yet because I could not verify the complete job post. Please paste the job details or upload a screenshot so I can check the role, company, application email, and your Sent mail first.`
+
+### Blocked because Gmail is unavailable
+
+`I could not verify your Sent mail, so I have not drafted the application email. Do you want me to proceed without the duplicate check?`
+
+## Regression check
+
+Before responding, verify the current path against `references/workflow-tests.md`. If the response would draft an email before Gate 2 and Gate 3 are complete, stop and correct the workflow.
