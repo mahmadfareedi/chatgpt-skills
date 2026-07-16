@@ -20,9 +20,25 @@ Source: `skills/job-application-checker/`
 
 Packaged archive: `dist/job-application-checker.zip`
 
+### English Corrector
+
+Corrects, rewrites, and formats text in clear, natural US English. It preserves the original meaning, returns only the finished text by default, follows M. Ahmad's concise professional style, avoids unnecessary dash punctuation, and keeps normal email writing separate from Gmail draft or send actions.
+
+It also defers job application emails to the Job Application Checker so the Gmail duplicate check is not bypassed.
+
+Source: `skills/english-corrector/`
+
+Packaged archive: `dist/english-corrector.zip`
+
+## Skill sync agent
+
+Use `AGENT_PROMPT.md` with an agent that can access the skills and GitHub. The prompt checks for meaningful differences, validates changed skills, rebuilds packages, and pushes only necessary updates.
+
 ## Repository structure
 
 ```text
+AGENT_PROMPT.md
+
 skills/
   job-application-checker/
     SKILL.md
@@ -30,8 +46,14 @@ skills/
     references/application-profile.md
     references/workflow-tests.md
 
+  english-corrector/
+    SKILL.md
+    agents/openai.yaml
+    assets/icon.svg
+
 dist/
   job-application-checker.zip
+  english-corrector.zip
 ```
 
 ## Privacy
